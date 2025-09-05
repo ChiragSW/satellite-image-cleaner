@@ -1,43 +1,27 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from models.cloud_classifier import CloudClassifier
+from utils.prepare_dataset import get_dataloaders
 import argparse
 from tqdm import tqdm
 import os
 
 def main(args):
-
-    # device setup
+    # Device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Data pipeline
-    train_transform = transforms.Compose([
-        transforms.Resize(int(args.image_size * 1.1)),  # resize larger
-        transforms.RandomCrop(args.image_size),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    val_transform = transforms.Compose([
-        transforms.Resize((args.image_size, args.image_size)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    # data
-    train_data = datasets.ImageFolder(f"{args.data_dir}/train", transform=train_transform)
-    val_data = datasets.ImageFolder(f"{args.data_dir}/val", transform=val_transform)
-
-    # load data
-    train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(val_data, batch_size=args.batch_size, num_workers=4, pin_memory=True)
+    # Data (train/val split happens inside get_dataloaders)
+    train_loader, val_loader = get_dataloaders(
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        img_size=args.image_size,
+        val_split=args.val_split
+    )
 
     # Model
-    model = CloudClassifier(num_classes=len(train_data.classes)).to(device)
+    model = CloudClassifier(num_classes=2).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=2, factor=0.5)
@@ -83,14 +67,16 @@ def main(args):
 
         scheduler.step(val_loss)
 
-        print(f"Epoch {epoch+1}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, " f"Val Loss={val_loss:.4f}, Val Acc={val_acc:.4f}")
+        print(f"Epoch {epoch+1}: "
+              f"Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, "
+              f"Val Loss={val_loss:.4f}, Val Acc={val_acc:.4f}")
 
         # Save best model
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             os.makedirs(os.path.dirname(args.save_path), exist_ok=True)
             torch.save(model.state_dict(), args.save_path)
-            print(f"Best model saved at {args.save_path}")
+            print(f"✅ Best model saved at {args.save_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -99,6 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--image_size", type=int, default=224)
+    parser.add_argument("--val_split", type=float, default=0.2)  # <<--- now handled here
     parser.add_argument("--save_path", type=str, default="checkpoints/cloud_classifier_best.pth")
     args = parser.parse_args()
     main(args)
