@@ -17,6 +17,7 @@ __pycache__/
 
 # checkpoints
 data/
+checkpoints/cloud_classifier.pth
 checkpoints/
 logs/
 inpainting_data/
