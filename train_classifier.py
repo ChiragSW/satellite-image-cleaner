@@ -14,11 +14,11 @@ def main(args):
 
     # Data (train/val split happens inside get_dataloaders)
     train_loader, val_loader = get_dataloaders(
-        data_dir=args.data_dir,
-        batch_size=args.batch_size,
-        img_size=args.image_size,
-        val_split=args.val_split
-    )
+    data_dir=args.data_dir,
+    image_size=args.image_size,
+    batch_size=args.batch_size
+)
+
 
     # Model
     model = CloudClassifier(num_classes=2).to(device)
@@ -76,7 +76,7 @@ def main(args):
             best_val_loss = val_loss
             os.makedirs(os.path.dirname(args.save_path), exist_ok=True)
             torch.save(model.state_dict(), args.save_path)
-            print(f"✅ Best model saved at {args.save_path}")
+            print(f"Best model saved at {args.save_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
