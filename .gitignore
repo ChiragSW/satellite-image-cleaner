@@ -10,11 +10,11 @@ __pycache__/
 .ipynb_checkpoints/
 *.ipynb
 data/
-segmentation_data/
 checkpoints/cloud_classifier.pth
 checkpoints/
 logs/
 inpainting_data/
+segmentation_data/
 partialconv/
 *.pth
 *.pt
