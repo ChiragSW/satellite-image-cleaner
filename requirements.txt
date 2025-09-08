@@ -3,3 +3,4 @@ torchvision
 albumentations
 pillow
 tqdm
+argparse

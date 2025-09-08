@@ -7,14 +7,11 @@ from models.esrgan import RRDBNet
 from models.partialconv import PartialConvInpaint
 from models.cloud_segmenter import CloudSegmenterUNet
 
-# --- Robust Path Calculation ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPAINTING_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "gated_conv_inpainter.pth")
-CLASSIFIER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_classifier.pth")
+CLASSIFIER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_classifier_best.pth")
 ESRGAN_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "RRDB_ESRGAN_x4.pth")
 SEGMENTER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_segmenter.pth")
-# --- End of Path Calculation ---
-
 
 class EnhancementPipeline:
     def __init__(self, device=None):

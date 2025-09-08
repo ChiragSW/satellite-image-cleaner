@@ -1,39 +1,26 @@
-# Virtual environments
 venv/
 env/
 .venv/
 satellite_env
-
-# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 *.pkl
-
-# Jupyter & Colab
 .ipynb_checkpoints/
 *.ipynb
-
-# checkpoints
 data/
 checkpoints/cloud_classifier.pth
 checkpoints/
 logs/
 inpainting_data/
 partialconv/
-
-# Model weights
 *.pth
 *.pt
 *.onnx
-
-# System / Editor files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
-
-# Colab temporary files
 kaggle.json
 

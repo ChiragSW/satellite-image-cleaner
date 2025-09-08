@@ -47,23 +47,19 @@ def get_dataloaders(data_dir="data", image_size=224, batch_size=32, num_workers=
         transforms.RandomCrop(image_size),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     val_transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     train_data = datasets.ImageFolder(os.path.join(data_dir, "train"), transform=train_transform)
     val_data = datasets.ImageFolder(os.path.join(data_dir, "val"), transform=val_transform)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True,
-                              num_workers=num_workers, pin_memory=True)
-    val_loader = DataLoader(val_data, batch_size=batch_size,
-                            num_workers=num_workers, pin_memory=True)
+    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    val_loader = DataLoader(val_data, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
 
     return train_loader, val_loader
