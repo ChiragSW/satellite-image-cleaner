@@ -9,7 +9,7 @@ from models.cloud_segmenter import CloudSegmenterUNet
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPAINTING_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "gated_conv_inpainter.pth")
-CLASSIFIER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_classifier_best.pth")
+CLASSIFIER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_classifier_best.pth") # Train Loss=0.0428, Train Acc=0.9848, Val Loss=0.0202, Val Acc=0.9951
 ESRGAN_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "RRDB_ESRGAN_x4.pth")
 SEGMENTER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_segmenter.pth")
 
