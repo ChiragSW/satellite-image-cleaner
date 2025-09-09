@@ -7,6 +7,7 @@ from models.esrgan import RRDBNet
 from models.partialconv import PartialConvInpaint
 from models.cloud_segmenter import CloudSegmenterUNet
 
+# define paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPAINTING_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "gated_conv_inpainter.pth")
 CLASSIFIER_CHECKPOINT = os.path.join(SCRIPT_DIR, "checkpoints", "cloud_classifier_best.pth") # Train Loss=0.0428, Train Acc=0.9848, Val Loss=0.0202, Val Acc=0.9951
@@ -18,14 +19,14 @@ class EnhancementPipeline:
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
 
-        # 1. Cloud Classifier
+        # Cloud Classifier
         self.cloud_model = CloudClassifier(num_classes=2)
         self.cloud_model.load_state_dict(
             torch.load(CLASSIFIER_CHECKPOINT, map_location=self.device)
         )
         self.cloud_model.to(self.device).eval()
 
-        # 2. Cloud Segmenter
+        # Cloud Segmenter
         self.segmenter_model = CloudSegmenterUNet()
         if os.path.exists(SEGMENTER_CHECKPOINT):
             print(f"Loading Cloud Segmenter from {SEGMENTER_CHECKPOINT}")
@@ -38,7 +39,7 @@ class EnhancementPipeline:
             print("WARNING: Cloud segmenter checkpoint not found.")
         self.segmenter_model.to(self.device).eval()
 
-        # 3. ESRGAN
+        # ESRGAN
         self.esrgan = RRDBNet(scale=4)
         self.esrgan.load_state_dict(
             torch.load(ESRGAN_CHECKPOINT, map_location=self.device),
@@ -46,7 +47,7 @@ class EnhancementPipeline:
         )
         self.esrgan.to(self.device).eval()
 
-        # 4. GatedConv Inpainter
+        # GatedConv Inpainter
         self.inpaint_model = PartialConvInpaint(
             checkpoint_path=INPAINTING_CHECKPOINT,
             device=self.device
@@ -59,7 +60,7 @@ class EnhancementPipeline:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         
-        # MODIFIED: Reduced resolution to prevent Out-of-Memory errors
+        # Reduced resolution to prevent Out-of-Memory errors
         self.enhance_transform = transforms.Compose([
             transforms.Resize((384, 384)),
             transforms.ToTensor()
@@ -74,7 +75,7 @@ class EnhancementPipeline:
         return pred_class, probs.squeeze().cpu().numpy()
 
     def enhance(self, img_tensor, pred):
-        # OPTIMIZED: Wrap all inference in no_grad to save memory
+        # Wrap all inference in no_grad to save memory
         with torch.no_grad():
             if pred == "Cloudy":
                 print("Cloud detected. Generating precise mask with Segmenter...")
@@ -98,7 +99,7 @@ class EnhancementPipeline:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"Image not found: {image_path}")
             
-        print(f"--- Starting Enhancement for {os.path.basename(image_path)} ---")
+        print(f"Starting Enhancement for {os.path.basename(image_path)}")
         img = Image.open(image_path).convert("RGB")
         
         img_tensor_cls = self.classifier_transform(img).unsqueeze(0).to(self.device)
@@ -113,5 +114,5 @@ class EnhancementPipeline:
         out_img = transforms.ToPILImage()(out)
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         out_img.save(save_path)
-        print(f"--- Successfully saved enhanced image at {save_path} ---")
+        print(f"Successfully saved enhanced image at {save_path}")
 
