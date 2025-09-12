@@ -4,6 +4,7 @@ This model detects clouds in a satellite image using a made-from-scratch ResNet1
 ## Table of Contents
 - [Tech Stack](#tech-stack-used)  
 - [Model Structure](#model-structure)  
+- [How to use?](#how-to-use)
 
 ## Tech Stack used
 | Stack | Tech |
@@ -74,3 +75,47 @@ satellite-image-cleaning/
 ├── train_inpainter.py              # train inpainter model
 └── train_segmenter.py              # train segmenter model
 ```
+## How to use?
+- For classifier weights
+```bash
+py train_classifier.py
+mv cloud_classifier_best.pth checkpoints/
+```
+- For segmenter weights and inpainting training model (Do this in google colab, for powerful GPU)
+```bash
+py train_segmenter.py
+mv cloud_segmenter.pth checkpoints/
+py train_inpainter.py
+mv gated_conv_inpainting.pth checkpoints/
+```
+- Download pretrained ESRGAN weights, mine are from [kaggle](https://www.kaggle.com/datasets/djokester/real-esrgan-weights)
+```bash
+mv RRDB_ESRGAN_x4.pth checkpoints/
+```
+- Download dataset for cloud classification from kaggle. (It should have cloudy and clear images)
+- Download dataset for cloud segmenting, mine are from [kaggle](https://www.kaggle.com/datasets/ajoshi944/cloud-masking-dataset-v1)
+- Download dataset for cloud inpainting, mine are from [kaggle](https://www.kaggle.com/datasets/shubhank001/rice-remote-sensing-images-for-cloud-removal)
+- Put them in right directories.
+- Put the image you want to convert in testing-env/inputs/
+- Install dependencies
+```bash
+pip install -r requirements.txt
+```
+- RUN IT!
+```bash
+py run_pipeline.py
+```
+
+## Example
+<table>
+  <tr>
+    <td align="center">
+      <img src="testing-env/inputs/0.png" alt="Input Image" width="300"/><br>
+      <em>Input Satellite Image</em>
+    </td>
+    <td align="center">
+      <img src="testing-env/outputs/satelliteimagetestingenhanced.png" alt="Output Image" width="300"/><br>
+      <em>Cleaned Output Image</em>
+    </td>
+  </tr>
+</table>
