@@ -11,15 +11,15 @@ class PartialConvInpaint(nn.Module):
 
         if checkpoint_path and os.path.exists(checkpoint_path):
             print(f"Loading GatedConv checkpoint from {checkpoint_path}")
-            # Load the entire checkpoint package
+            # load checkpoint package
             checkpoint = torch.load(checkpoint_path, map_location=self.device)
 
-            # Check if the checkpoint is a dictionary from the training script
+            # check if the checkpoint is a dictionary from the training script
             if 'model_state_dict' in checkpoint:
                 print("Extracting model weights from training checkpoint.")
                 self.model.load_state_dict(checkpoint['model_state_dict'])
             else:
-                # If not, assume it's just the model weights
+                # if not, assume it's just the model weights
                 print("Loading model weights directly.")
                 self.model.load_state_dict(checkpoint)
         else:

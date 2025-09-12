@@ -18,28 +18,27 @@ class EnhancementPipeline:
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
 
-        # 1. Cloud Classifier (To decide if an image needs processing)
+        # Cloud Classifier
         self.cloud_model = CloudClassifier(num_classes=2)
         self.cloud_model.load_state_dict(
             torch.load(CLASSIFIER_CHECKPOINT, map_location=self.device)
         )
         self.cloud_model.to(self.device).eval()
 
-        # 2. Cloud Segmenter (To find the *exact* location of clouds)
+        # Cloud Segmenter
         self.segmenter_model = CloudSegmenterUNet()
         if os.path.exists(SEGMENTER_CHECKPOINT):
             print(f"Loading Cloud Segmenter from {SEGMENTER_CHECKPOINT}")
-            # Handle the checkpoint format from our training script
             ckpt = torch.load(SEGMENTER_CHECKPOINT, map_location=self.device)
             if 'model_state_dict' in ckpt:
                  self.segmenter_model.load_state_dict(ckpt['model_state_dict'])
-            else: # For older/simpler checkpoint files
+            else:
                  self.segmenter_model.load_state_dict(ckpt)
         else:
             print("WARNING: Cloud segmenter checkpoint not found. The pipeline will not be able to inpaint clouds precisely.")
         self.segmenter_model.to(self.device).eval()
 
-        # 3. ESRGAN (To enhance resolution)
+        # ESRGAN
         self.esrgan = RRDBNet(scale=4)
         self.esrgan.load_state_dict(
             torch.load(ESRGAN_CHECKPOINT, map_location=self.device),
@@ -47,7 +46,7 @@ class EnhancementPipeline:
         )
         self.esrgan.to(self.device).eval()
 
-        # 4. GatedConv Inpainter (To remove the clouds found by the segmenter)
+        # GatedConv Inpainter
         self.inpaint_model = PartialConvInpaint(
             checkpoint_path=INPAINTING_CHECKPOINT,
             device=self.device
@@ -60,7 +59,7 @@ class EnhancementPipeline:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         
-        # Transform for the main enhancement/inpainting path
+        # Transform for the main inpainting path
         self.enhance_transform = transforms.Compose([
             transforms.Resize((512, 512)),
             transforms.ToTensor()
@@ -76,7 +75,6 @@ class EnhancementPipeline:
         return pred_class, probs.squeeze().cpu().numpy()
 
     def enhance(self, img_tensor, pred):
-        # The image tensor is in [0, 1] range here
         if pred == "Cloudy":
             print("Cloud detected. Generating precise mask with Segmenter...")
             # Use the segmenter to create a precise mask of the clouds
@@ -109,21 +107,17 @@ class EnhancementPipeline:
         print(f"--- Starting Enhancement for {os.path.basename(image_path)} ---")
         img = Image.open(image_path).convert("RGB")
         
-        # Create two versions of the tensor: one for classification, one for enhancement
         img_tensor_cls = self.classifier_transform(img).unsqueeze(0).to(self.device)
         img_tensor_enh = self.enhance_transform(img).unsqueeze(0).to(self.device)
         
-        # Step 1: Classify the image to see if it's cloudy
         pred, probs = self.classify(img_tensor_cls)
         print(f"Classification Result: {pred} | Probabilities: {probs}")
         
-        # Step 2: Enhance the image based on the classification
         final = self.enhance(img_tensor_enh, pred)
         
-        # Step 3: Save the final, high-resolution image
         out = final.squeeze().detach().cpu().clamp(0, 1)
         out_img = transforms.ToPILImage()(out)
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         out_img.save(save_path)
-        print(f"--- Successfully saved enhanced image at {save_path} ---")
+        print(f"Successfully saved enhanced image at {save_path}")
 

@@ -6,8 +6,6 @@ from torchvision import transforms
 from PIL import Image
 import os
 from tqdm import tqdm
-
-# Import the new GatedConvUNet
 from models.partialconv_network import GatedConvUNet
 
 class InpaintingDataset(Dataset):
@@ -40,7 +38,6 @@ class InpaintingDataset(Dataset):
 def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # --- Hyperparameters ---
     DATASET_DIR = "inpainting_data"
     IMAGE_DIR = os.path.join(DATASET_DIR, "images")
     MASK_DIR = os.path.join(DATASET_DIR, "masks")
@@ -49,7 +46,6 @@ def main():
     LR = 1e-4
     BATCH_SIZE = 8
 
-    # --- Dataset and DataLoader ---
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.ToTensor()
@@ -63,12 +59,11 @@ def main():
     dataset = InpaintingDataset(IMAGE_DIR, MASK_DIR, transform)
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
-    # --- Model, Loss, and Optimizer ---
     model = GatedConvUNet().to(device)
     criterion = nn.L1Loss() # L1 loss is common for inpainting
     optimizer = optim.Adam(model.parameters(), lr=LR)
 
-    print("Starting training for the GatedConvUNet Inpainter...")
+    print("Starting training for the GatedConvUNet Inpainter")
 
     for epoch in range(EPOCHS):
         model.train()

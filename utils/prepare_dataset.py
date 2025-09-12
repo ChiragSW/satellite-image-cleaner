@@ -41,7 +41,6 @@ def prepare_dataset(root="data", train_ratio=0.8, exts=(".png", ".jpg", ".jpeg",
 
 
 def get_dataloaders(data_dir="data", image_size=224, batch_size=32, num_workers=4):
-    """Build PyTorch dataloaders for train/val"""
     train_transform = transforms.Compose([
         transforms.Resize(int(image_size * 1.1)),
         transforms.RandomCrop(image_size),

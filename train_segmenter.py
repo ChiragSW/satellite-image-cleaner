@@ -6,7 +6,6 @@ from torchvision import transforms
 from PIL import Image
 import os
 from tqdm import tqdm
-
 from models.cloud_segmenter import CloudSegmenterUNet
 
 class SegmentationDataset(Dataset):
@@ -42,7 +41,7 @@ def main():
     CHECKPOINT_SAVE_PATH = "checkpoints/cloud_segmenter.pth"
     EPOCHS = 50
     LR = 1e-4
-    BATCH_SIZE = 4 # U-Nets can be memory intensive, start with a smaller batch size
+    BATCH_SIZE = 4
 
     transform = transforms.Compose([
         transforms.Resize((512, 512)),
@@ -58,7 +57,6 @@ def main():
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
 
     model = CloudSegmenterUNet(n_channels=3, n_classes=1).to(device)
-    # This loss is better for segmentation tasks
     criterion = nn.BCEWithLogitsLoss() 
     optimizer = optim.Adam(model.parameters(), lr=LR)
 
@@ -71,7 +69,7 @@ def main():
         start_epoch = checkpoint.get('epoch', 0)
         print(f"Resumed from epoch {start_epoch}")
 
-    print("Starting training for the CloudSegmenterUNet...")
+    print("Starting training for the CloudSegmenterUNet")
 
     for epoch in range(start_epoch, EPOCHS):
         model.train()

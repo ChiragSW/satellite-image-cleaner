@@ -2,11 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# Gated conv for inpainting
 class GatedConv2d(nn.Module):
-    """
-    Gated Convolutional Layer for Image Inpainting.
-    This layer learns a dynamic feature gating mechanism for each channel and spatial location.
-    """
     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, activation=nn.ELU(inplace=True)):
         super(GatedConv2d, self).__init__()
         self.activation = activation
@@ -25,7 +22,6 @@ class GatedConv2d(nn.Module):
         return features * gate
 
 class GatedConvBlock(nn.Module):
-    """A block combining Gated Convolution with Batch Normalization."""
     def __init__(self, in_c, out_c, kernel_size=3, stride=2, padding=1, activation='relu', bn=True):
         super().__init__()
         
@@ -45,13 +41,9 @@ class GatedConvBlock(nn.Module):
         return x
 
 class GatedConvUNet(nn.Module):
-    """
-    A U-Net architecture built with Gated Convolutional layers for high-quality image inpainting.
-    This model must be trained to generate a new checkpoint file.
-    """
     def __init__(self, input_channels=4): # Input is Image(3) + Mask(1) = 4 channels
         super().__init__()
-        # --- Encoder ---
+        # encoder
         self.enc_1 = GatedConvBlock(input_channels, 64, kernel_size=7, stride=2, padding=3, bn=False, activation='leaky')
         self.enc_2 = GatedConvBlock(64, 128, kernel_size=5, stride=2, padding=2, activation='leaky')
         self.enc_3 = GatedConvBlock(128, 256, kernel_size=5, stride=2, padding=2, activation='leaky')
@@ -60,20 +52,20 @@ class GatedConvUNet(nn.Module):
         # Bottleneck
         self.bottleneck = GatedConvBlock(512, 512, kernel_size=3, stride=2, padding=1, activation='leaky')
 
-        # --- Decoder ---
+        # decoder
         self.dec_4 = GatedConvBlock(512 + 512, 512, stride=1, activation='relu')
         self.dec_3 = GatedConvBlock(512 + 256, 256, stride=1, activation='relu')
         self.dec_2 = GatedConvBlock(256 + 128, 128, stride=1, activation='relu')
         self.dec_1 = GatedConvBlock(128 + 64, 64, stride=1, activation='relu')
         
-        # Final layers
+        # final layers
         self.final_upsample = nn.Upsample(scale_factor=2, mode='nearest')
         self.final_conv = nn.Conv2d(64, 3, 3, 1, 1)
         
     def forward(self, x, mask):
         x_with_mask = torch.cat([x, mask], dim=1)
 
-        # --- Encoder ---
+        # encoder
         x1 = self.enc_1(x_with_mask)
         x2 = self.enc_2(x1)
         x3 = self.enc_3(x2)
@@ -81,7 +73,7 @@ class GatedConvUNet(nn.Module):
         
         xb = self.bottleneck(x4)
 
-        # --- Decoder with Skip Connections ---
+        # decoder
         dx = F.interpolate(xb, scale_factor=2, mode='nearest')
         dx = torch.cat([dx, x4], 1)
         dx = self.dec_4(dx)

@@ -21,7 +21,6 @@ class ResidualDenseBlock(nn.Module):
         return x5 * 0.2 + x
 
 class RRDB(nn.Module):
-    """Residual in Residual Dense Block"""
     def __init__(self, nf, gc=32):
         super(RRDB, self).__init__()
         self.rdb1 = ResidualDenseBlock(nf, gc)
@@ -55,7 +54,7 @@ class RRDBNet(nn.Module):
             ]
         self.upsampler = nn.Sequential(*up_layers)
 
-        # Final conv layers
+        # final conv layers
         self.HRconv = nn.Conv2d(nf, nf, 3, 1, 1, bias=True)
         self.conv_last = nn.Conv2d(nf, out_nc, 3, 1, 1, bias=True)
 

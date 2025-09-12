@@ -1,6 +1,6 @@
 import torch
 from torchvision import transforms
-from PIL import Image
+from PIL import Image # pillow for images
 import os
 from models.cloud_classifier import CloudClassifier
 from models.esrgan import RRDBNet
@@ -60,7 +60,6 @@ class EnhancementPipeline:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         
-        # Reduced resolution to prevent Out-of-Memory errors
         self.enhance_transform = transforms.Compose([
             transforms.Resize((384, 384)),
             transforms.ToTensor()
@@ -75,7 +74,6 @@ class EnhancementPipeline:
         return pred_class, probs.squeeze().cpu().numpy()
 
     def enhance(self, img_tensor, pred):
-        # Wrap all inference in no_grad to save memory
         with torch.no_grad():
             if pred == "Cloudy":
                 print("Cloud detected. Generating precise mask with Segmenter...")

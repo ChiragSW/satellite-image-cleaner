@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# two convolutional layers: BatchNorm and ReLu
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels, mid_channels=None):
         super().__init__()
@@ -19,6 +20,7 @@ class DoubleConv(nn.Module):
     def forward(self, x):
         return self.double_conv(x)
 
+# downscaling 
 class Down(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
@@ -30,6 +32,7 @@ class Down(nn.Module):
     def forward(self, x):
         return self.maxpool_conv(x)
 
+# upscaling
 class Up(nn.Module):
     def __init__(self, in_channels, out_channels, bilinear=True):
         super().__init__()
@@ -58,6 +61,7 @@ class OutConv(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
+# full U-Net
 class CloudSegmenterUNet(nn.Module):
     def __init__(self, n_channels=3, n_classes=1, bilinear=True):
         super(CloudSegmenterUNet, self).__init__()

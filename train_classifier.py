@@ -85,7 +85,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--image_size", type=int, default=224)
-    parser.add_argument("--val_split", type=float, default=0.2)  # <<--- now handled here
+    parser.add_argument("--val_split", type=float, default=0.2)
     parser.add_argument("--save_path", type=str, default="checkpoints/cloud_classifier_best.pth")
     args = parser.parse_args()
     main(args)
