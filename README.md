@@ -119,3 +119,15 @@ py run_pipeline.py
     </td>
   </tr>
 </table>
+
+## Author
+# Chirag Wattamwar  
+
+<p align="center">
+  <a href="https://instagram.com/chirag_gg234">
+    <img src="https://img.shields.io/badge/Instagram-%23E4405F.svg?&logo=instagram&logoColor=white&style=for-the-badge"/>
+  </a>
+  <a href="https://www.linkedin.com/in/chirag-wattamwar-5b985a313">
+    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/>
+  </a>
+</p>
